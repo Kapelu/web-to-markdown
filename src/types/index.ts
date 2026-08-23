@@ -8,6 +8,16 @@ export interface GetPageDataMessage {
   type: 'GET_PAGE_DATA'
 }
 
+export interface GetSelectionDataMessage {
+  type: 'GET_SELECTION_DATA'
+}
+
+export interface SelectionData {
+  title: string
+  url: string
+  content: string
+}
+
 export interface DownloadMarkdownMessage {
   type: 'DOWNLOAD_MARKDOWN'
   payload: {
@@ -18,4 +28,5 @@ export interface DownloadMarkdownMessage {
 
 export type ExtensionMessage =
   | GetPageDataMessage
+  | GetSelectionDataMessage
   | DownloadMarkdownMessage

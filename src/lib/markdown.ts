@@ -16,6 +16,63 @@ function convertChildren(element: Node): string {
     .join('')
 }
 
+function getCodeFence(value: string): string {
+  const matches = value.match(/`+/g) ?? []
+  const longest = matches.reduce((max, match) => Math.max(max, match.length), 0)
+  return '`'.repeat(Math.max(3, longest + 1))
+}
+
+function getConsoleContent(element: HTMLElement): string {
+  const storedContent = element.getAttribute('data-console-content')
+
+  if (storedContent) {
+    return storedContent.trim()
+  }
+
+  const consoleBody = element.querySelector('.console-body')
+
+  if (!consoleBody) {
+    return ''
+  }
+
+  const getNodeText = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ?? ''
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return ''
+    }
+
+    const child = node as HTMLElement
+
+    if (child.tagName.toLowerCase() === 'slot') {
+      const slot = child as HTMLSlotElement
+      const assignedNodes = slot.assignedNodes({ flatten: true })
+
+      if (assignedNodes.length > 0) {
+        return assignedNodes.map(getNodeText).join('')
+      }
+    }
+
+    if (
+      child.classList.contains('console-header') ||
+      child.classList.contains('copy-container') ||
+      child.classList.contains('copy-button') ||
+      child.classList.contains('copy-flash')
+    ) {
+      return ''
+    }
+
+    return Array.from(child.childNodes).map(getNodeText).join('')
+  }
+
+  return getNodeText(consoleBody)
+    .replace(/\r\n?/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .trim()
+}
+
 function convertNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
     return escapeText(node.textContent ?? '')
@@ -27,6 +84,34 @@ function convertNode(node: Node): string {
 
   const element = node as HTMLElement
   const tag = element.tagName.toLowerCase()
+
+  if (element.classList.contains('console')) {
+    const consoleContent = getConsoleContent(element)
+
+    if (consoleContent) {
+      const fence = getCodeFence(consoleContent)
+      return `\n\n${fence}text\n${consoleContent}\n${fence}\n\n`
+    }
+  }
+
+  if (tag === 'lll-ui-console') {
+    const lines = Array.from(element.children)
+      .filter((child) => child.tagName.toLowerCase() === 'lll-ui-console-line')
+      .map((child) => (child.textContent ?? '').trim())
+      .filter(Boolean)
+
+    const consoleContent = lines.join('\n')
+
+    if (consoleContent) {
+      const fence = getCodeFence(consoleContent)
+      return `\n\n${fence}${element.getAttribute('language') ?? 'text'}\n${consoleContent}\n${fence}\n\n`
+    }
+  }
+
+  if (tag === 'lll-ui-console-line') {
+    return normalizeWhitespace(element.textContent ?? '')
+  }
+
   const content = convertChildren(element)
 
   switch (tag) {
