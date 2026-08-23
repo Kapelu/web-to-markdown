@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Web to Markdown",
+  "version": "2.0.0",
+  "description": "Guarda páginas web como archivos Markdown.",
+  "permissions": ["downloads"],
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_title": "Guardar como Markdown"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "author": "KWS",
+  "icons": {
+    "128": "logo.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
