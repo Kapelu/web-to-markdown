@@ -42,11 +42,11 @@ export function Popup() {
       const { title, url, content } = response.data
 
       const markdown = [
-        '---',
+      /*  '---',
         `title: "${title.replace(/"/g, '\\"')}"`,
         `url: ${url}`,
         `date: ${new Date().toISOString().slice(0, 10)}`,
-        '---',
+        '---', */
         '',
         content,
       ].join('\n')
