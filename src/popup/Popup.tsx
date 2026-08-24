@@ -54,7 +54,7 @@ export function Popup() {
       const downloadResponse = (await chrome.runtime.sendMessage({
         type: 'DOWNLOAD_MARKDOWN',
         payload: {
-          content: markdown,
+          /* content: markdown, */
           filename: createMarkdownFilename(title),
         },
       })) as DownloadResponse
